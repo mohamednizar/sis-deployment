@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: moe
+  name: openemis-3
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: openemis-3
+---
+apiVersion: apps/v1  # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  namespace: moe
+  name: openemis-3
+spec:
+  selector:
+    matchLabels:
+      app: openemis-3
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: openemis-3
+    spec:
+      containers:
+      - image: moelk/openemis-mysql:latest
+        imagePullPolicy: Always
+        name: openemis-3
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: secret
+          - name: MYSQL_DATABASE
+            value: openemis
+          - name: MYSQL_USER
+            value: openuser
+          - name: MYSQL_PASSWORD
+            value: openpass
+        ports:
+        - containerPort: 3306
+          name: openemis-3
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: ./mysql/my.cnf:/etc/mysql/my.cnf
+        lifecycle:
+            postStart:
+              exec:
+                command: ["--max_allowed_packet=32505856"]
+        resources:      
+            limits:
+              cpu: 200m # ~2/10th of a core
+              memory: "500Mi" # 500 Mebibytes 
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-moe-claim
+
