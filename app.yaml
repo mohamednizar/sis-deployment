@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openemisfpm
+  namespace: moe
+spec:
+  selector:
+    matchLabels:
+      app: openemisfpm
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: openemisfpm
+        track: stable
+    spec:
+      containers:
+        - name: openemisfpm-2
+          image: moelk/openemisfpm:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 400m # ~4/10th of a core
+              memory: "500Mi" # 500 Mebibytes
+  
+              
