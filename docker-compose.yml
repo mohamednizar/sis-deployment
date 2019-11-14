@@ -1,0 +1,51 @@
+version: '2'
+
+services:
+  sis-mysql:
+    build: ./mysql
+    user : mysql
+    container_name: sis-mysql
+    volumes:
+        # - ./mysql:/var/lib/mysql/data
+        - ./mysql/my.cnf:/etc/mysql/my.cnf
+        - ./mysql/Dump20190123-2:/docker-entrypoint-initdb.d
+    ports:
+      - "8106:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=openemis
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=secret
+    command:  '--sql_mode=NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION --max_allowed_packet=32505856'
+
+
+  sis:
+      build: ./sis
+      container_name: sis
+      volumes:
+          - ./sis/app:/var/www/html/
+      ports:
+          - "8180:80"
+  memcached:
+      image: 'bitnami/memcached:latest'
+      ports:
+        - "11211:11211"
+
+  sis-bulk-upload:
+      tty: true
+      image: bitnami/laravel:5-debian-9
+      environment:
+        - DB_HOST=sis-mysql
+        - DB_USERNAME=root
+        - DB_DATABASE=openemis
+        - DB_PASSWORD=secret
+      depends_on:
+        - sis-mysql
+      ports:
+        - 3001:3000
+      volumes:
+        - ./bulk-upload:/app
+      restart: always
+      cmd : php artisan key:generate
+
+
