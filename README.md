@@ -7,7 +7,9 @@ This package have three componants
 2. SIS bulk upload application - (https://github.com/moe-lk/bulk-upload.git)
 3. Mysql - store this files to mysql (https://github.com/moe-lk/sis/tree/master/mysql/Dump20190205)
 
-![Folder Structure] (images/folder-structure.png)
+Your folder structure should be like below
+
+![Folder Structure](images/folder-structure.png)
 
 Dependancies 
 1. Docker
